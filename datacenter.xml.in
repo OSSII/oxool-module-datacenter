@@ -1,0 +1,11 @@
+<config>
+    <db>
+        <path type="string">@DB_FILE@</path>
+    </db>
+    <logging>
+        <log_file type="string">@LOG_FILE@</log_file>
+    </logging>
+    <rawfile>
+        <dir_path type="string">@TEMPLATE_PATH@</dir_path>
+    </rawfile>
+</config>

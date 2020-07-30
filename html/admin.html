@@ -1,0 +1,329 @@
+{% BLOCK content %}
+<meta charset="utf-8">
+<script src="datacenter/js/AdminSocketConfigSettings.js"> </script>
+<link rel="stylesheet" type="text/css" href="datacenter/css/datacenter.css" />
+<script>
+    if (window.location.protocol == "https:") {
+        host = 'wss://' + window.location.host + '%SERVICE_ROOT%/lool/adminws/'
+    }
+    else {
+        host = 'ws://' + window.location.host + '%SERVICE_ROOT%/lool/adminws/'
+    }
+
+    var configSocket = Admin.ConfigSettings(host);
+</script>
+
+<ul class="nav nav-tabs">
+    <li role="presentation" class="active"><a data-toggle="tab" href="#a1" class="tabctl">OpenData 上傳</a></li>
+    <li role="presentation" class=""><a data-toggle="tab" href="#a3" class="tabctl">OpenData API 管理</a></li>
+    <li role="presentation" class=""><a data-toggle="tab" href="#a5" class="tabctl">設定檔管理</a></li>
+    <li role="presentation" class=""><a data-toggle="tab" href="#a6" class="tabctl">版權聲明</a></li>
+</ul>
+<div class="tab-content" style="height: 100%;">
+    <!--******************************OpenData 上傳******************************-->
+    <div id="a1" class="tab-pane in active">
+        <!-- Color Picker under MIT LICENSE -->
+        <div class="fluid-container panel-body" style="padding-top:10px;">
+            <form class="form-horizontal" id="test_form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="">測試檔案</label>
+                    <input name="filename" type="file" class="form-control-file" id="test_filename">
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-xs-2">
+                            <button class="btn btn-primary" id="test_form_submit">開始上傳？</button>
+                        </div>
+                        <div class="col-xs-6">
+                            <div class="progress" id="pgbar-root">
+                                <div id="pgbar" class="active progress-bar progress-bar-striped progress-bar-animated"
+                                    role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"
+                                    style="width: 0%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+            </form>
+            <div class="panel panel-info fluid-container" role="alert">
+                <div class="panel-heading">
+                    <h5 id="api_url">
+
+                    </h5>
+                </div>
+                <div class="panel-body fluid-container">
+                    <pre id="api_data"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--******************************Mac addr******************************-->
+    <div id="a3" class="tab-pane" style="width: 60%;">
+        <div class="fluid-container" style="padding-top: 10px;">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-success btn-lg" id="refreshAPIList">
+                刷新 API 列表
+            </button>
+            <div class="fluid-container" style="padding-top: 10px;" id="apilist"></div>
+        </div>
+    </div>
+    <!--******************************設定檔管理******************************-->
+    <div id="a5" class="tab-pane" style="width: 100%;">
+        <div class="fluid-container">
+            <form class="form-horizontal" id="mainform">
+                <div class="panel-group">
+                    <!-- 一般設定 -->
+                    <div class="panel panel-primary">
+                        <div class="panel-heading"><strong>一般設定</strong></div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="control-label col-md-3" for="db.path">datacenter 資料庫位置</label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="db.path">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3" for="logging.log_file">Logging 檔案</label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="logging.log_file">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-3" for="rawfile.dir_path">原始檔案儲存資料夾</label>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="rawfile.dir_path">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div><button class="btn btn-info pull-right" id="saveConfig" disabled><strong>更新設定</strong></button></div>
+        </div>
+    </div>
+    <!--******************************版權聲明******************************-->
+    <div id="a6" class="tab-pane" style="width: 100%; padding-top:10px;">
+        <pre id="license" class="panel-body" style="border: 0; background-color: transparent;">
+        </pre>
+    </div>
+</div>
+
+<script>
+    var getCookie = function (name) {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.indexOf(name) === 0) {
+                return cookie;
+            }
+        }
+        return '';
+    }
+    $(document).ready(function () {
+        // 修改 XML Config 設定
+        $('#saveConfig').attr('disabled', false)
+            .click(function () {
+                $('#saveConfig').attr('disabled', true);
+
+                var form = $('#mainform').find('input, select, textarea');
+                var json = {};
+                for (var i = 0; i < form.length; i++) {
+                    var id = form[i].id;
+                    if (id == 'net.post_allow.host' ||
+                        id == 'storage.wopi.host' ||
+                        id == 'storage.webdav.host') {
+                        var arr = document.getElementsByClassName(id + '[]');
+                        for (var j = 0; j < arr.length; j++) {
+                            json[id + '[' + j + ']'] = arr[j].textContent;
+                            var allow = arr[j].attributes.allow;
+                            if (typeof allow != 'undefined') {
+                                json[id + '[' + j + '][@allow]'] = allow.value;
+                            }
+                        }
+                        continue;
+                    }
+
+                    var value;
+                    var input = document.getElementById(id);
+                    if (input) {
+                        switch (input.type) {
+                            case 'checkbox':
+                            case 'radio':
+                                value = input.checked ? 'true' : 'false';
+                                break;
+                            default:
+                                value = input.value;
+                                break;
+                        }
+                        json[id] = value;
+                    }
+                }
+                configSocket.setConfig(JSON.stringify(json));
+            });
+        $('form').submit(function (e) {
+            e.preventDefault();
+        });
+        $('#test_form_submit').click(function () {
+            var test_url = window.location.protocol + "//" + window.location.host + `/lool/datacenter/upload`;
+
+            var fData = new FormData(document.getElementById("test_form"));
+
+            $.ajax({
+                xhr: function xhr() {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function (evt) {
+                        if (evt.lengthComputable) {
+                            var percentComplete = evt.loaded / evt.total;
+                            $('#pgbar').css({
+                                width: (percentComplete) * 100 + '%'
+                            }).html('上傳檔案中...');
+                        }
+                    }, false);
+                    xhr.upload.addEventListener("load", function (evt) {
+                        if (evt.lengthComputable) {
+                            var percentComplete = evt.loaded / evt.total;
+                            $('#pgbar').css({
+                                width: (percentComplete) * 100 + '%'
+                            }).html('伺服器處理中...');
+                        }
+                    }, false);
+                    return xhr;
+                },
+                url: test_url,
+                type: "POST",
+                data: fData,
+                dataType: "text",
+                processData: false,
+                contentType: false,
+                cache: false
+            }).success(function (res) {
+                $('#pgbar').html('完成');
+                var api_url = window.location.protocol + "//" + window.location.host + `/lool/datacenter/${res}/json`;
+                $.ajax({
+                    url: api_url,
+                    type: "GET",
+                    dataType: "json"
+                }).success(function (res) {
+                    console.log(res);
+                    $("#api_url").html(`OpenData API: ${api_url}`);
+                    $("#api_data").html(JSON.stringify(res, undefined, 4));
+                });
+            }).error(function (jqXHR, error, errorThrown) {
+                alert("伺服器錯誤");
+            });
+
+        });
+
+        $.ajax(
+            {
+                url: "datacenter/MPL2.0.txt",
+            }).done(function (res) {
+                $("#license").html(res);
+            });
+
+        $("#refreshAPIList").click(() => {
+            refreshAPIList();
+        });
+
+
+        if (getCookie('deftab') != '') {
+            var tabid = getCookie('deftab').split('=')[1];
+            if (tabid == '') {
+                $('.nav-tabs a[href="#a1"]').tab('show');
+            }
+            else {
+                $('.nav-tabs a[href="' + tabid + '"]').tab('show');
+            }
+        }
+    });
+
+    /* 記憶選取的 tab　位置: 重開網頁以此為依據 */
+    $('.nav-tabs a').click(function () {
+        document.cookie = 'deftab=' + this.hash;
+    });
+
+    function refreshAPIList() {
+        $("#apilist").html("");
+        var apilist_url = window.location.protocol + "//" + window.location.host + `/lool/datacenter/apilist`;
+        $.ajax({
+            url: apilist_url,
+            type: "GET",
+            dataType: "text"
+        }).success((res) => {
+            res = res.replace(/\n/g, "");
+            res = res.replace(/\r/g, "");
+            res = res.replace(/ /g, "");
+            console.log(res);
+            res = JSON.parse(res);
+            for(apiInfo in res){
+                var allCol = res[apiInfo]['allCol'].split(",");
+                var outputCol = res[apiInfo]['outputCol'].split(",");
+                var checkboxList="";
+                for(colIndex in allCol){
+                    var check_template = `
+                    <div class="form-group col-4">
+                        <input type="checkbox" name="${allCol[colIndex]}" ${outputCol.includes(allCol[colIndex]) ? "checked": ""}>
+                        <label>${allCol[colIndex]}</label>
+                    </div>`;
+                    checkboxList += check_template;
+                }
+                
+                var button_template = `
+                <div class="panel-group col-md-6" id="accordion" role="tablist" aria-multiselectable="true">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="heading${apiInfo}">
+                            <h4 class="panel-title">
+                                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse${apiInfo}" aria-expanded="false" aria-controls="collapse${apiInfo}">
+                                ${res[apiInfo]['docname']}
+                                </a>
+                            </h4>
+                            <h5>${res[apiInfo]['endpt']}</h5>
+                        </div>
+                        <div id="collapse${apiInfo}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading${apiInfo}">
+                            <div class="panel-body">
+                                <form action="javacript:;" onsubmit="formSubmit(this)" id="${res[apiInfo]['endpt']}">
+                                    ${checkboxList}
+                                    <button type="submit" value="Submit">更改資料欄位</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+                $("#apilist").append(button_template);
+            }
+        }).error((res) => {
+            console.log(res);
+        });
+    }
+    
+    function formSubmit(e){
+        console.log(e);
+        var inputList = $(e).find("input");
+        var outputCol = "";
+        for(index in inputList){
+            console.log(inputList[index])
+            if(inputList[index].checked)
+                outputCol+=inputList[index].name+",";
+        }
+        var fData = new FormData();
+        fData.set("outputCol", outputCol);
+        var api_set_url = window.location.protocol + "//" + window.location.host + `/lool/datacenter/${e.id}/set`;
+        $.ajax({
+            url: api_set_url,
+            type: "POST",
+            data: fData,
+            processData: false,
+            contentType: false,
+            cache: false
+        }).success((res)=>{
+            console.log(res);
+            alert("OK");
+        }).error((res)=>{
+            console.log(res);
+            alert("Fail");
+        })
+    }
+</script>
+{% END BLOCK %}

@@ -1,0 +1,74 @@
+%define modules_dir /usr/lib64/oxool
+%define modules_data_dir /var/lib/oxool
+%define modules_conf_dir /etc/oxool/conf.d
+%define loroot /opt/oxoffice
+
+Name:           @PACKAGE_NAME@
+Version:        @PACKAGE_VERSION@
+Release:        @LOOLWSD_VERSION_DIST@.@BRANCH@%{?dist}
+Vendor:         %{vendor}
+Summary:        OxOffice Online Module datacenter
+License:        MPL
+Obsoletes:	oxoolwsd
+Source0:        @PACKAGE_NAME@-%{version}-@BRANCH@.tar.gz
+BuildRequires:  poco-devel >= 1.7.5 oxool-devel >= 3.2.8
+Requires: oxool >= 3.2.8
+
+%description
+
+
+%prep
+%setup -q -n %{name}-%{version}-@BRANCH@
+
+%build
+
+./autogen.sh
+./configure
+
+make %{?_smp_mflags}
+
+%check
+#make check
+
+%install
+
+#module
+mkdir -p %{buildroot}/%{modules_data_dir}/datacenter/
+mkdir -p %{buildroot}/%{modules_data_dir}/datacenter/oxoffice_oxt/
+mkdir -p %{buildroot}/%{modules_data_dir}/datacenter/html/
+mkdir -p %{buildroot}/%{modules_data_dir}/datacenter/html/js
+mkdir -p %{buildroot}/%{modules_data_dir}/datacenter/html/css
+mkdir -p %{buildroot}/%{modules_conf_dir}/datacenter/
+mkdir -p %{buildroot}/%{modules_dir}
+%__install src/.libs/libdatacenter.so.0.0.0 %{buildroot}/%{modules_dir}/libdatacenter.so
+%__install datacenter.xml %{buildroot}/%{modules_conf_dir}/datacenter/datacenter.xml
+%__install html/*.html %{buildroot}/%{modules_data_dir}/datacenter/html/
+%__install html/*.txt %{buildroot}/%{modules_data_dir}/datacenter/html/
+%__install html/js/*.js %{buildroot}/%{modules_data_dir}/datacenter/html/js
+%__install html/css/*.css %{buildroot}/%{modules_data_dir}/datacenter/html/css
+%__install oxoffice_oxt/Csv2Json.oxt %{buildroot}/%{modules_data_dir}/datacenter/oxoffice_oxt/Csv2Json.oxt
+
+%pre
+
+%{loroot}/program/unopkg remove Csv2Json.oxt --shared | true
+
+%post
+
+touch /var/log/datacenter.log && chown lool:lool /var/log/datacenter.log
+
+%{loroot}/program/unopkg add %{modules_data_dir}/datacenter/oxoffice_oxt/Csv2Json.oxt --shared | true
+
+%preun
+
+%postun
+
+
+%files
+%dir %attr(777, lool, lool) %{modules_data_dir}/datacenter/
+%dir %attr(777, lool, lool) %{modules_data_dir}/datacenter/html
+%dir %attr(777, lool, lool) %{modules_data_dir}/datacenter/oxoffice_oxt
+%{modules_dir}/libdatacenter.so
+%config(noreplace) %attr(600, lool, lool) %{modules_conf_dir}/datacenter/datacenter.xml
+%{modules_data_dir}/datacenter/html/*
+%{modules_data_dir}/datacenter/oxoffice_oxt/Csv2Json.oxt
+%changelog
