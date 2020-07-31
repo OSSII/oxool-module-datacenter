@@ -13,13 +13,13 @@
     var configSocket = Admin.ConfigSettings(host);
 </script>
 
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+<div class="modal fade" id="jsonModal" tabindex="-1" role="dialog" aria-labelledby="jsonModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">New message</h4>
+                <h4 class="modal-title" id="jsonModalLabel">New message</h4>
             </div>
             <div class="modal-body">
                 <pre></pre>
@@ -128,11 +128,9 @@
 </div>
 
 <script>
-    $('#exampleModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Button that triggered the modal
-        var endpt = button.data('whatever'); // Extract info from data-* attributes
-        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+    $('#jsonModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); 
+        var endpt = button.data('whatever'); 
         var api_url = window.location.protocol + "//" + window.location.host + `/lool/datacenter/${endpt}/json`;
         var modal = $(this);
         modal.find('.modal-title').text('API: ' + endpt);
@@ -327,7 +325,7 @@
                                     <button type="submit" value="Submit">更改資料欄位</button>
                                 </form>
                                 <hr>
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="${res[apiInfo]['endpt']}">Get JSON Data</button>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#jsonModal" data-whatever="${res[apiInfo]['endpt']}">Get JSON Data</button>
                             </div>
                         </div>
                     </div>

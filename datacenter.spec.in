@@ -5,7 +5,7 @@
 
 Name:           @PACKAGE_NAME@
 Version:        @PACKAGE_VERSION@
-Release:        @LOOLWSD_VERSION_DIST@.@BRANCH@%{?dist}
+Release:        @OXOOLMODULE_VERSION_DIST@.@BRANCH@%{?dist}
 Vendor:         %{vendor}
 Summary:        OxOffice Online Module datacenter
 License:        MPL
