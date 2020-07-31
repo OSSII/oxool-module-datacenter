@@ -153,15 +153,7 @@ std::string FileDB::getInfo()
     std::string extname = "";
     Statement select(session);
     std::string get_sql = R"MULTILINE(
-        select repo_templates.extname, 
-            repo_templates.cname, 
-            repo_templates.uptime, 
-            repo_templates.docname, 
-            repo_templates.endpt,
-            file_api_setting.allCol,
-            file_api_setting.outputCol
-            from repo_templates, file_api_setting
-            group by repo_templates.endpt;
+        select r.extname,r.cname, r.uptime, r.docname, r.endpt, f.allCol,f.outputCol, f.endpt from repo_templates r inner join file_api_setting f on r.endpt=f.endpt;
     )MULTILINE";
     select << get_sql;
     RecordSet rs(select);
@@ -191,6 +183,7 @@ std::string FileDB::getInfo()
             }
             more = rs.moveNext();
             data.push_back(line);
+            std::cout << "json data: " << line << "\n";
         }
     }
     std::string result = "[";

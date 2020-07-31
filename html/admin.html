@@ -13,6 +13,24 @@
     var configSocket = Admin.ConfigSettings(host);
 </script>
 
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">New message</h4>
+            </div>
+            <div class="modal-body">
+                <pre></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <ul class="nav nav-tabs">
     <li role="presentation" class="active"><a data-toggle="tab" href="#a1" class="tabctl">OpenData 上傳</a></li>
     <li role="presentation" class=""><a data-toggle="tab" href="#a3" class="tabctl">OpenData API 管理</a></li>
@@ -58,7 +76,7 @@
             </div>
         </div>
     </div>
-    <!--******************************Mac addr******************************-->
+    <!--******************************API 列表******************************-->
     <div id="a3" class="tab-pane" style="width: 60%;">
         <div class="fluid-container" style="padding-top: 10px;">
             <!-- Button trigger modal -->
@@ -110,6 +128,27 @@
 </div>
 
 <script>
+    $('#exampleModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var endpt = button.data('whatever'); // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var api_url = window.location.protocol + "//" + window.location.host + `/lool/datacenter/${endpt}/json`;
+        var modal = $(this);
+        modal.find('.modal-title').text('API: ' + endpt);
+        modal.find('pre').html('資料取得中...');
+        $.ajax({
+            url: api_url,
+            type: "GET",
+            dataType: "json",
+            cache: false
+        }).success(function (res) {
+            modal.find('pre').html(JSON.stringify(res, undefined, 4));
+        }).error(function (res) {
+            alert("error");
+        });
+    })
+
     var getCookie = function (name) {
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {
@@ -203,7 +242,8 @@
                 $.ajax({
                     url: api_url,
                     type: "GET",
-                    dataType: "json"
+                    dataType: "json",
+                    cache: false
                 }).success(function (res) {
                     console.log(res);
                     $("#api_url").html(`OpenData API: ${api_url}`);
@@ -249,26 +289,25 @@
         $.ajax({
             url: apilist_url,
             type: "GET",
-            dataType: "text"
+            dataType: "text",
+            cache: false
         }).success((res) => {
             res = res.replace(/\n/g, "");
             res = res.replace(/\r/g, "");
             res = res.replace(/ /g, "");
             console.log(res);
             res = JSON.parse(res);
-            for(apiInfo in res){
+            for (apiInfo in res) {
                 var allCol = res[apiInfo]['allCol'].split(",");
                 var outputCol = res[apiInfo]['outputCol'].split(",");
-                var checkboxList="";
-                for(colIndex in allCol){
+                var checkboxList = "";
+                for (colIndex in allCol) {
                     var check_template = `
-                    <div class="form-group col-4">
-                        <input type="checkbox" name="${allCol[colIndex]}" ${outputCol.includes(allCol[colIndex]) ? "checked": ""}>
-                        <label>${allCol[colIndex]}</label>
-                    </div>`;
+                        <input type="checkbox" name="${allCol[colIndex]}" ${outputCol.includes(allCol[colIndex]) ? "checked" : ""}>
+                        <label>${allCol[colIndex]}</label>`;
                     checkboxList += check_template;
                 }
-                
+
                 var button_template = `
                 <div class="panel-group col-md-6" id="accordion" role="tablist" aria-multiselectable="true">
                     <div class="panel panel-default">
@@ -284,8 +323,11 @@
                             <div class="panel-body">
                                 <form action="javacript:;" onsubmit="formSubmit(this)" id="${res[apiInfo]['endpt']}">
                                     ${checkboxList}
+                                    <br>
                                     <button type="submit" value="Submit">更改資料欄位</button>
                                 </form>
+                                <hr>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="${res[apiInfo]['endpt']}">Get JSON Data</button>
                             </div>
                         </div>
                     </div>
@@ -297,15 +339,15 @@
             console.log(res);
         });
     }
-    
-    function formSubmit(e){
+
+    function formSubmit(e) {
         console.log(e);
         var inputList = $(e).find("input");
         var outputCol = "";
-        for(index in inputList){
+        for (index in inputList) {
             console.log(inputList[index])
-            if(inputList[index].checked)
-                outputCol+=inputList[index].name+",";
+            if (inputList[index].checked)
+                outputCol += inputList[index].name + ",";
         }
         var fData = new FormData();
         fData.set("outputCol", outputCol);
@@ -317,10 +359,10 @@
             processData: false,
             contentType: false,
             cache: false
-        }).success((res)=>{
+        }).success((res) => {
             console.log(res);
             alert("OK");
-        }).error((res)=>{
+        }).error((res) => {
             console.log(res);
             alert("Fail");
         })
