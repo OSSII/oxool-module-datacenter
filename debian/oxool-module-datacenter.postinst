@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    configure)
+	touch /var/log/datacenter.log && chown lool:lool /var/log/datacenter.log
+	/opt/oxoffice/program/unopkg add /var/lib/oxool/datacenter/oxoffice_oxt/CsvJson.oxt --shared | true
+	;;
+
+esac
+
+#DEBHELPER#

@@ -1,0 +1,13 @@
+Source: oxool-module-datacenter
+Section: web
+Priority: optional
+Maintainer: Tommy.Wu <tommy.wu@ossii.com.tw>
+Build-Depends: debhelper (>= 9), libcap-dev, libcap2-bin, libpcre3-dev, libpng-dev, libpoco-dev (>= 1.7.5), linux-libc-dev, fontconfig, libpam-dev, libcppunit-dev, pkg-config, devscripts
+Standards-Version: 1.0.0
+
+Package: oxool-module-datacenter
+Section: web
+Architecture: any
+Depends: oxool-dev
+Description: OxOffice Online Module Datacenter
+ oxool module datacenter is a middle engine between RawData and OpenData JSON API.
