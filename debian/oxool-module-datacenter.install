@@ -1,4 +1,5 @@
 #!/usr/bin/dh-exec
 html/* var/lib/oxool/datacenter/html
 datacenter.xml /etc/oxool/conf.d/datacenter/
+oxoffice_oxt/* var/lib/oxool/datacenter/oxoffice_oxt/
 src/.libs/libdatacenter.so.0.0.0 => usr/lib64/oxool/libdatacenter.so

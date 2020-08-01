@@ -5,7 +5,8 @@ set -e
 case "$1" in
     configure)
 	touch /var/log/datacenter.log && chown lool:lool /var/log/datacenter.log
-	/opt/oxoffice/program/unopkg add /var/lib/oxool/datacenter/oxoffice_oxt/CsvJson.oxt --shared | true
+	chown -R lool:lool /var/lib/oxool/datacenter
+	/opt/oxoffice/program/unopkg add /var/lib/oxool/datacenter/oxoffice_oxt/Csv2Json.oxt --shared | true
 	;;
 
 esac
