@@ -11,8 +11,8 @@ Summary:        OxOffice Online Module datacenter
 License:        MPL
 Obsoletes:	oxoolwsd
 Source0:        @PACKAGE_NAME@-%{version}-@BRANCH@.tar.gz
-BuildRequires:  poco-devel >= 1.7.5 oxool-devel >= 3.2.8
-Requires: oxool >= 3.2.8
+BuildRequires:  poco-devel >= 1.7.5 oxool-devel >= 3.2.9
+Requires: oxool >= 3.2.9
 
 %description
 
@@ -55,6 +55,8 @@ mkdir -p %{buildroot}/%{modules_dir}
 %post
 
 touch /var/log/datacenter.log && chown lool:lool /var/log/datacenter.log
+mkdir -p %{modules_data_dir}/datacenter/templates
+chown -R lool:lool %{modules_data_dir}/datacenter/templates
 
 %{loroot}/program/unopkg add %{modules_data_dir}/datacenter/oxoffice_oxt/Csv2Json.oxt --shared | true
 
