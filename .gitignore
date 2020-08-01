@@ -55,3 +55,11 @@ tags
 test/tags
 TAGS
 test/TAGS
+
+#debian
+debian/.debhelper/
+debian/files
+debian/oxool-module-datacenter.debhelper.log
+debian/oxool-module-datacenter.substvars
+debian/oxool-module-datacenter/
+debian/tmp/

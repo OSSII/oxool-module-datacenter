@@ -1,4 +1,4 @@
 #!/usr/bin/dh-exec
 html/* var/lib/oxool/datacenter/html
-sample.xml /etc/oxool/conf.d/datacenter/
+datacenter.xml /etc/oxool/conf.d/datacenter/
 src/.libs/libdatacenter.so.0.0.0 => usr/lib64/oxool/libdatacenter.so
